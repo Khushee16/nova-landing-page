@@ -1,0 +1,254 @@
+/* ============ Nova landing page interactions ============ */
+(function () {
+  "use strict";
+
+  /* ---------- Dark / light mode (persisted) ---------- */
+  var themeToggle = document.getElementById("themeToggle");
+  var root = document.documentElement;
+
+  function getStoredTheme() {
+    try { return localStorage.getItem("nova-theme"); } catch (e) { return null; }
+  }
+  function storeTheme(theme) {
+    try { localStorage.setItem("nova-theme", theme); } catch (e) { /* storage unavailable */ }
+  }
+  function initTheme() {
+    var stored = getStoredTheme();
+    if (stored === "dark" || stored === "light") {
+      root.setAttribute("data-theme", stored);
+    } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      root.setAttribute("data-theme", "dark");
+    }
+  }
+  initTheme();
+  if (themeToggle) {
+    themeToggle.addEventListener("click", function () {
+      var next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+      root.setAttribute("data-theme", next);
+      storeTheme(next);
+    });
+  }
+
+  /* ---------- Mobile nav ---------- */
+  var hamburger = document.getElementById("hamburger");
+  var navLinks = document.getElementById("navLinks");
+  if (hamburger && navLinks) {
+    hamburger.addEventListener("click", function () {
+      var open = navLinks.classList.toggle("open");
+      hamburger.classList.toggle("open", open);
+      hamburger.setAttribute("aria-expanded", open ? "true" : "false");
+      hamburger.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+    });
+    navLinks.addEventListener("click", function (e) {
+      if (e.target.closest("a")) {
+        navLinks.classList.remove("open");
+        hamburger.classList.remove("open");
+        hamburger.setAttribute("aria-expanded", "false");
+      }
+    });
+  }
+
+  /* ---------- Header shadow on scroll ---------- */
+  var header = document.getElementById("siteHeader");
+  function onScroll() {
+    if (header) header.classList.toggle("scrolled", window.scrollY > 8);
+  }
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+
+  /* ---------- Scroll reveal ---------- */
+  var revealEls = document.querySelectorAll(".reveal");
+  if ("IntersectionObserver" in window && revealEls.length) {
+    var revealObs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+          revealObs.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    revealEls.forEach(function (el) { revealObs.observe(el); });
+  } else {
+    revealEls.forEach(function (el) { el.classList.add("visible"); });
+  }
+
+  /* ---------- Animated counters ---------- */
+  var counters = document.querySelectorAll(".stat-num");
+  function animateCounter(el) {
+    var target = parseFloat(el.getAttribute("data-target"));
+    var suffix = el.getAttribute("data-suffix") || "";
+    var decimals = parseInt(el.getAttribute("data-decimals") || "0", 10);
+    var duration = 1600;
+    var start = null;
+    function fmt(v) {
+      return v.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals }) + suffix;
+    }
+    function step(ts) {
+      if (!start) start = ts;
+      var p = Math.min((ts - start) / duration, 1);
+      var eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = fmt(target * eased);
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  if ("IntersectionObserver" in window && counters.length) {
+    var cntObs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          animateCounter(entry.target);
+          cntObs.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.5 });
+    counters.forEach(function (el) { cntObs.observe(el); });
+  }
+
+  /* ---------- Pricing toggle ---------- */
+  var toggleBtns = document.querySelectorAll(".toggle-btn");
+  var amounts = document.querySelectorAll(".amount");
+  toggleBtns.forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      toggleBtns.forEach(function (b) { b.classList.remove("active"); });
+      btn.classList.add("active");
+      var period = btn.getAttribute("data-period");
+      amounts.forEach(function (amt) {
+        amt.style.opacity = "0";
+        setTimeout(function () {
+          amt.textContent = "$" + amt.getAttribute("data-" + period);
+          amt.style.opacity = "1";
+        }, 150);
+      });
+    });
+  });
+
+  /* ---------- Testimonial carousel ---------- */
+  var testimonials = [
+    { quote: "Nova replaced three tools for us. Our Monday metrics meeting went from 90 minutes of arguing about numbers to 20 minutes of deciding what to do.", name: "Maya Chen", role: "Head of Data, Northwind" },
+    { quote: "The alerts alone are worth it. We caught a checkout bug within an hour of deploy because Nova pinged us about the conversion dip.", name: "Devon Park", role: "Product Lead, Helios" },
+    { quote: "I onboarded our whole marketing team in a day. Nobody asks me for CSV exports anymore — they just build their own dashboards.", name: "Priya Nair", role: "Growth Manager, Brightline" },
+    { quote: "We evaluated five BI tools. Nova was the only one our finance team actually adopted without training sessions.", name: "Tom Alvarez", role: "CFO, Copperfield" }
+  ];
+  var track = document.getElementById("tTrack");
+  var dotsWrap = document.getElementById("tDots");
+  var prevBtn = document.getElementById("tPrev");
+  var nextBtn = document.getElementById("tNext");
+  var carousel = document.getElementById("carousel");
+  var current = 0, timer = null;
+
+  function renderSlides() {
+    testimonials.forEach(function (t, i) {
+      var slide = document.createElement("div");
+      slide.className = "t-slide";
+      slide.setAttribute("role", "tabpanel");
+      var stars = document.createElement("div");
+      stars.className = "t-stars";
+      stars.textContent = "\u2605\u2605\u2605\u2605\u2605";
+      var quote = document.createElement("p");
+      quote.className = "t-quote";
+      quote.textContent = "\u201C" + t.quote + "\u201D";
+      var name = document.createElement("p");
+      name.className = "t-name";
+      name.textContent = t.name;
+      var role = document.createElement("p");
+      role.className = "t-role";
+      role.textContent = t.role;
+      slide.appendChild(stars);
+      slide.appendChild(quote);
+      slide.appendChild(name);
+      slide.appendChild(role);
+      track.appendChild(slide);
+
+      var dot = document.createElement("button");
+      dot.className = "t-dot" + (i === 0 ? " active" : "");
+      dot.setAttribute("aria-label", "Show testimonial " + (i + 1));
+      dot.addEventListener("click", function () { goTo(i); restartAuto(); });
+      dotsWrap.appendChild(dot);
+    });
+  }
+  function goTo(i) {
+    current = (i + testimonials.length) % testimonials.length;
+    track.style.transform = "translateX(-" + current * 100 + "%)";
+    var dots = dotsWrap.querySelectorAll(".t-dot");
+    dots.forEach(function (d, idx) { d.classList.toggle("active", idx === current); });
+  }
+  function restartAuto() {
+    if (timer) clearInterval(timer);
+    timer = setInterval(function () { goTo(current + 1); }, 6000);
+  }
+  if (track && dotsWrap) {
+    renderSlides();
+    if (prevBtn) prevBtn.addEventListener("click", function () { goTo(current - 1); restartAuto(); });
+    if (nextBtn) nextBtn.addEventListener("click", function () { goTo(current + 1); restartAuto(); });
+    restartAuto();
+    if (carousel) {
+      carousel.addEventListener("mouseenter", function () { if (timer) clearInterval(timer); });
+      carousel.addEventListener("mouseleave", restartAuto);
+    }
+  }
+
+  /* ---------- FAQ accordion ---------- */
+  var faqItems = document.querySelectorAll(".faq-item");
+  faqItems.forEach(function (item) {
+    var q = item.querySelector(".faq-q");
+    var a = item.querySelector(".faq-a");
+    if (!q || !a) return;
+    q.addEventListener("click", function () {
+      var isOpen = item.classList.contains("open");
+      faqItems.forEach(function (other) {
+        other.classList.remove("open");
+        var oa = other.querySelector(".faq-a");
+        var oq = other.querySelector(".faq-q");
+        if (oa) oa.style.maxHeight = "0px";
+        if (oq) oq.setAttribute("aria-expanded", "false");
+      });
+      if (!isOpen) {
+        item.classList.add("open");
+        a.style.maxHeight = a.scrollHeight + "px";
+        q.setAttribute("aria-expanded", "true");
+      }
+    });
+  });
+
+  /* ---------- Contact form validation ---------- */
+  var form = document.getElementById("contactForm");
+  var success = document.getElementById("formSuccess");
+  function setError(inputId, msg) {
+    var input = document.getElementById(inputId);
+    var err = document.getElementById("err-" + inputId);
+    if (!input || !err) return false;
+    if (msg) {
+      err.textContent = msg;
+      input.classList.add("invalid");
+      return false;
+    }
+    err.textContent = "";
+    input.classList.remove("invalid");
+    return true;
+  }
+  if (form) {
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var name = document.getElementById("cfName").value.trim();
+      var email = document.getElementById("cfEmail").value.trim();
+      var message = document.getElementById("cfMessage").value.trim();
+      var ok = true;
+      ok = setError("cfName", name.length < 2 ? "Please enter your name." : "") && ok;
+      ok = setError("cfEmail", /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) ? "" : "Please enter a valid work email.") && ok;
+      ok = setError("cfMessage", message.length < 10 ? "Tell us a little more (at least 10 characters)." : "") && ok;
+      if (ok) {
+        form.hidden = true;
+        if (success) success.hidden = false;
+        if (success) success.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    });
+    ["cfName", "cfEmail", "cfMessage"].forEach(function (id) {
+      var input = document.getElementById(id);
+      if (input) input.addEventListener("input", function () { setError(id, ""); });
+    });
+  }
+
+  /* ---------- Footer year ---------- */
+  var yearEl = document.getElementById("year");
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
+})();
