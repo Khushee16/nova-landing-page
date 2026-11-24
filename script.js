@@ -210,9 +210,32 @@
     });
   });
 
-  /* ---------- Contact form validation ---------- */
+  /* ---------- Contact form: validate, then POST to contact.php ----------
+     contact.php is a plain PHP endpoint that saves the lead to data/leads.json.
+     On static hosting (GitHub Pages) or file:// there is no PHP backend, so a
+     failed fetch shows a clearly-labelled DEMO success state instead of
+     pretending the message was sent. */
   var form = document.getElementById("contactForm");
   var success = document.getElementById("formSuccess");
+  var successTitle = document.getElementById("formSuccessTitle");
+  var successText = document.getElementById("formSuccessText");
+  var demoNote = document.getElementById("formDemoNote");
+  var submitBtn = document.getElementById("cfSubmit");
+  function showSuccess(isDemo) {
+    form.hidden = true;
+    if (!success) return;
+    if (isDemo) {
+      if (successTitle) successTitle.textContent = "Thanks — demo mode";
+      if (successText) successText.textContent = "Your message looks good, but this demo has no backend connected, so it wasn't sent anywhere.";
+      if (demoNote) demoNote.hidden = false;
+    } else {
+      if (successTitle) successTitle.textContent = "Message sent!";
+      if (successText) successText.textContent = "Thanks for reaching out — someone from our team will reply within one business day.";
+      if (demoNote) demoNote.hidden = true;
+    }
+    success.hidden = false;
+    success.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
   function setError(inputId, msg) {
     var input = document.getElementById(inputId);
     var err = document.getElementById("err-" + inputId);
@@ -231,16 +254,31 @@
       e.preventDefault();
       var name = document.getElementById("cfName").value.trim();
       var email = document.getElementById("cfEmail").value.trim();
+      var company = document.getElementById("cfCompany") ? document.getElementById("cfCompany").value.trim() : "";
       var message = document.getElementById("cfMessage").value.trim();
       var ok = true;
       ok = setError("cfName", name.length < 2 ? "Please enter your name." : "") && ok;
       ok = setError("cfEmail", /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) ? "" : "Please enter a valid work email.") && ok;
       ok = setError("cfMessage", message.length < 10 ? "Tell us a little more (at least 10 characters)." : "") && ok;
-      if (ok) {
-        form.hidden = true;
-        if (success) success.hidden = false;
-        if (success) success.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
+      if (!ok) return;
+      if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "Sending…"; }
+      fetch("contact.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name, email: email, company: company, message: message })
+      })
+        .then(function (res) {
+          if (!res.ok) throw new Error("backend unavailable (" + res.status + ")");
+          return res.json();
+        })
+        .then(function (data) {
+          if (data && data.ok) showSuccess(false);
+          else showSuccess(true); /* backend rejected it: don't fake a send */
+        })
+        .catch(function () { showSuccess(true); })
+        .finally(function () {
+          if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = "Send message"; }
+        });
     });
     ["cfName", "cfEmail", "cfMessage"].forEach(function (id) {
       var input = document.getElementById(id);

@@ -5,12 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Nova — analytics for modern teams. Dashboards, reports and alerts in one calm workspace." />
   <title>Nova — Analytics for modern teams</title>
+  <!-- Bootstrap 5 (layout + components) with custom CSS on top -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
+  <!--
+    Backend note: the contact form POSTs to contact.php, a plain dependency-free
+    PHP endpoint that saves leads to data/leads.json. It runs on any PHP host
+    (e.g. `php -S localhost:8000`). It does NOT run on GitHub Pages or file:// —
+    there the form shows a clearly-labelled demo success state instead.
+  -->
 </head>
 <body>
   <header id="siteHeader" class="site-header">
     <nav class="nav-inner" aria-label="Main navigation">
-      <a href="#home" class="logo" aria-label="Nova home">
+      <a href="index.html" class="logo" aria-label="Nova home">
         <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
           <circle cx="14" cy="14" r="13" stroke="currentColor" stroke-width="2.5"/>
           <circle cx="14" cy="14" r="5.5" fill="currentColor"/>
@@ -21,8 +32,8 @@
         <span></span><span></span><span></span>
       </button>
       <ul id="navLinks" class="nav-links">
-        <li><a href="#features">Features</a></li>
-        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="features.html">Features</a></li>
+        <li><a href="pricing.html">Pricing</a></li>
         <li><a href="#testimonials">Customers</a></li>
         <li><a href="#faq">FAQ</a></li>
         <li><a href="#contact" class="btn btn-primary nav-cta">Get started</a></li>
@@ -50,7 +61,7 @@
           <p class="hero-sub">Nova brings your metrics, dashboards, and reports into one calm workspace — so your team spends less time hunting numbers and more time acting on them.</p>
           <div class="hero-ctas">
             <a href="#contact" class="btn btn-primary btn-lg">Start free trial</a>
-            <a href="#features" class="btn btn-ghost btn-lg">See how it works</a>
+            <a href="features.html" class="btn btn-ghost btn-lg">See how it works</a>
           </div>
           <p class="hero-note">Free 14-day trial &middot; No credit card required</p>
         </div>
@@ -80,17 +91,18 @@
     <!-- TRUSTED BY -->
     <section class="trusted">
       <div class="container">
-        <p class="trusted-label">Trusted by data teams at</p>
+        <p class="trusted-label">Sample customer strip — fictional companies, demo copy only</p>
         <div class="logo-row">
           <span>Northwind</span><span>Helios</span><span>Brightline</span><span>Copperfield</span><span>Alto Labs</span>
         </div>
       </div>
     </section>
 
-    <!-- FEATURES -->
+    <!-- FEATURES (preview — full detail on features.html) -->
     <section id="features" class="section">
       <div class="container">
         <div class="section-head reveal">
+          <span class="eyebrow">Features</span>
           <h2>Everything you need to understand your business</h2>
           <p>One platform for dashboards, reporting, and alerts — built for teams that move fast.</p>
         </div>
@@ -126,6 +138,9 @@
             <p>SOC 2 Type II certified with SSO, audit logs, and region-pinned data residency for regulated teams.</p>
           </article>
         </div>
+        <div class="text-center mt-5 reveal">
+          <a href="features.html" class="btn btn-ghost btn-lg">Explore all features &rarr;</a>
+        </div>
       </div>
     </section>
 
@@ -139,10 +154,11 @@
       </div>
     </section>
 
-    <!-- PRICING -->
+    <!-- PRICING (preview — full detail on pricing.html) -->
     <section id="pricing" class="section">
       <div class="container">
         <div class="section-head reveal">
+          <span class="eyebrow">Pricing</span>
           <h2>Simple pricing that scales with you</h2>
           <p>Per user, per month. Cancel anytime.</p>
           <div class="billing-toggle" role="group" aria-label="Billing period">
@@ -190,6 +206,9 @@
             <a href="#contact" class="btn btn-ghost btn-block">Talk to sales</a>
           </article>
         </div>
+        <div class="text-center mt-5 reveal">
+          <a href="pricing.html" class="btn btn-ghost btn-lg">Compare plans in detail &rarr;</a>
+        </div>
       </div>
     </section>
 
@@ -197,8 +216,9 @@
     <section id="testimonials" class="section section-alt">
       <div class="container">
         <div class="section-head reveal">
+          <span class="eyebrow">Customers</span>
           <h2>Loved by data teams everywhere</h2>
-          <p>Real feedback from teams that switched to Nova.</p>
+          <p>Sample feedback written for this fictional product demo.</p>
         </div>
         <div class="carousel reveal" id="carousel">
           <div class="t-track" id="tTrack"></div>
@@ -213,6 +233,7 @@
     <section id="faq" class="section">
       <div class="container narrow">
         <div class="section-head reveal">
+          <span class="eyebrow">FAQ</span>
           <h2>Frequently asked questions</h2>
         </div>
         <div class="faq-list">
@@ -244,6 +265,7 @@
     <section id="contact" class="section section-alt">
       <div class="container narrow">
         <div class="section-head reveal">
+          <span class="eyebrow">Contact</span>
           <h2>Talk to our team</h2>
           <p>Questions about plans, migrations, or security reviews? We reply within one business day.</p>
         </div>
@@ -269,12 +291,13 @@
             <textarea id="cfMessage" name="message" rows="5" placeholder="Tell us what you're trying to solve..."></textarea>
             <small class="err" id="err-cfMessage"></small>
           </div>
-          <button type="submit" class="btn btn-primary btn-lg btn-block">Send message</button>
+          <button type="submit" class="btn btn-primary btn-lg btn-block" id="cfSubmit">Send message</button>
         </form>
         <div id="formSuccess" class="form-success" hidden>
           <div class="success-check">&#10003;</div>
-          <h3>Message sent!</h3>
-          <p>Thanks for reaching out — someone from our team will reply within one business day.</p>
+          <h3 id="formSuccessTitle">Message sent!</h3>
+          <p id="formSuccessText">Thanks for reaching out — someone from our team will reply within one business day.</p>
+          <p id="formDemoNote" class="demo-note" hidden>Demo mode — no backend connected. Your message was not sent or saved anywhere. On a PHP host, this form posts to contact.php and saves the lead to data/leads.json.</p>
         </div>
       </div>
     </section>
@@ -283,27 +306,28 @@
   <footer class="site-footer">
     <div class="container footer-grid">
       <div class="footer-brand">
-        <a href="#home" class="logo"><span>Nova</span></a>
+        <a href="index.html" class="logo"><span>Nova</span></a>
         <p>Analytics for modern teams.</p>
       </div>
       <div class="footer-col">
         <h4>Product</h4>
-        <a href="#features">Features</a><a href="#pricing">Pricing</a><a href="#testimonials">Customers</a>
+        <a href="features.html">Features</a><a href="pricing.html">Pricing</a><a href="#testimonials">Customers</a>
       </div>
       <div class="footer-col">
         <h4>Resources</h4>
-        <a href="#faq">FAQ</a><a href="#contact">Contact</a><a href="#home">Blog</a>
+        <a href="#faq">FAQ</a><a href="#contact">Contact</a><a href="index.html">Blog</a>
       </div>
       <div class="footer-col">
         <h4>Company</h4>
-        <a href="#home">About</a><a href="#home">Careers</a><a href="#home">Security</a>
+        <a href="index.html">About</a><a href="index.html">Careers</a><a href="index.html">Security</a>
       </div>
     </div>
     <div class="container footer-bottom">
-      <p>&copy; <span id="year"></span> Nova Analytics, Inc. All rights reserved.</p>
+      <p>&copy; <span id="year"></span> Nova Analytics, Inc. — a fictional product built as a portfolio demo. All rights reserved.</p>
     </div>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
   <script src="script.js"></script>
 </body>
 </html>
