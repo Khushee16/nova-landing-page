@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <a class="skip-link" href="#main">Skip to main content</a>
   <header id="siteHeader" class="site-header">
     <nav class="nav-inner" aria-label="Main navigation">
       <a href="index.html" class="logo" aria-label="Nova home">
@@ -42,15 +43,15 @@
     </nav>
   </header>
 
-  <main>
+  <main id="main">
     <section class="page-hero">
       <div class="container">
         <span class="eyebrow">Pricing</span>
         <h1>Simple pricing that scales with you</h1>
         <p>Per user, per month. Every plan starts with a free 14-day trial — no credit card required. Cancel anytime.</p>
         <div class="billing-toggle" role="group" aria-label="Billing period">
-          <button class="toggle-btn active" data-period="monthly">Monthly</button>
-          <button class="toggle-btn" data-period="yearly">Yearly <span class="save-tag">Save 20%</span></button>
+          <button class="toggle-btn active" data-period="monthly" aria-pressed="true">Monthly</button>
+          <button class="toggle-btn" data-period="yearly" aria-pressed="false">Yearly <span class="save-tag">Save 20%</span></button>
         </div>
       </div>
     </section>
